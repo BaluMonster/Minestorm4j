@@ -3,7 +3,6 @@ package eu.balumonster.minestorm4j;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.logging.Logger;
@@ -13,6 +12,7 @@ import com.google.gson.Gson;
 import eu.balumonster.minestorm4j.packets.PacketInNewSession;
 import eu.balumonster.minestorm4j.packets.PacketInStartServer;
 import eu.balumonster.minestorm4j.packets.PacketInStopServer;
+import eu.balumonster.minestorm4j.packets.PacketOutSessionCreated;
 
 public class Minestorm {
 
@@ -30,9 +30,10 @@ public class Minestorm {
 		PacketInNewSession ns=new PacketInNewSession();
 		ns.setStatus(PacketType.NEW_SESSION.getStatus());
 		Packet ok=sendPacket(ns);
-		if(Util.isInstance(ok, PacketType.OK)){
+		if(Util.isInstance(ok, PacketType.SESSION_CREATED)){
+			PacketOutSessionCreated out=(PacketOutSessionCreated) ok;
 			LOGGER.info("Connected");
-			//session=boh;
+			session=out.getSid(); 
 			return true;
 		}else{
 			LOGGER.warning("Connection Failed!");
@@ -66,13 +67,15 @@ public class Minestorm {
 	private Packet sendPacket(Packet packet){
 		try {
 			Socket socket=new Socket(host, port);
-			PrintWriter writer=new PrintWriter(socket.getOutputStream(), true);
 			BufferedReader reader=new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			Gson gson=new Gson();
 			String jsonRequest= gson.toJson(packet);
-			writer.print(jsonRequest);
+			System.out.println(jsonRequest);
+			socket.getOutputStream().write(jsonRequest.getBytes());
 			String jsonReponse=reader.readLine();
+			System.out.println(jsonReponse);
 			PacketType reponseType= Util.parseType(jsonReponse);
+			if(reponseType==null)System.out.println("null");
 			Packet result=gson.fromJson(jsonReponse, reponseType.getPacketClass());
 			socket.close();
 			return result;

@@ -1,5 +1,7 @@
 package eu.balumonster.minestorm4j;
 
+import java.util.HashMap;
+
 import eu.balumonster.minestorm4j.packets.PacketInChangeFocus;
 import eu.balumonster.minestorm4j.packets.PacketInCommand;
 import eu.balumonster.minestorm4j.packets.PacketInNewSession;
@@ -13,6 +15,7 @@ import eu.balumonster.minestorm4j.packets.PacketOutFailed;
 import eu.balumonster.minestorm4j.packets.PacketOutInvalidRequest;
 import eu.balumonster.minestorm4j.packets.PacketOutOk;
 import eu.balumonster.minestorm4j.packets.PacketOutPong;
+import eu.balumonster.minestorm4j.packets.PacketOutSessionCreated;
 import eu.balumonster.minestorm4j.packets.PacketOutStatusReponse;
 import eu.balumonster.minestorm4j.packets.PacketOutUpdates;
 
@@ -32,9 +35,22 @@ public enum PacketType {
 	PONG(PacketOutPong.class, "pong"),
 	OK(PacketOutOk.class, "ok"),
 	FAILED(PacketOutFailed.class, "failed"),
+	SESSION_CREATED(PacketOutSessionCreated.class, "session_created"),
 	STATUS_REPONSE(PacketOutStatusReponse.class, "status_reponse"),
 	UPDATES(PacketOutUpdates.class, "updates");
 
+	private static HashMap<String, PacketType> statusToPacketType=new HashMap<>();
+	
+	public static PacketType getPacketType(String status){
+		return statusToPacketType.get(status);
+	}
+	
+	static {
+		for (PacketType p:values()){
+			statusToPacketType.put(p.getStatus(), p);
+		}
+	}
+	
 	private Class<? extends Packet> clazz;
 	private String status;
 	
