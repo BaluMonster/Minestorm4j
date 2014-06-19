@@ -7,13 +7,22 @@ import lombok.Setter;
 @Deprecated
 public class PacketOutStatusReponse extends Packet{
 
-	public static class Servers{
-		@Getter @Setter
-		public Server server;
-	}
+	@Getter @Setter
+	public Server[] servers;
 	
 	public static class Server{
 		
+		@Getter @Setter
+		public String status;
+		
+		@Getter @Setter
+		public long started_at;
+		
+		@Getter @Setter
+		public int uptime;
+		
+		@Getter @Setter
+		public double ram;
 	}
 	
 }

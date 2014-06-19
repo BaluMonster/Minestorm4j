@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 import com.google.gson.Gson;
 
 import eu.balumonster.minestorm4j.packets.PacketInNewSession;
+import eu.balumonster.minestorm4j.packets.PacketInPing;
 import eu.balumonster.minestorm4j.packets.PacketInStartServer;
 import eu.balumonster.minestorm4j.packets.PacketInStopServer;
 import eu.balumonster.minestorm4j.packets.PacketOutSessionCreated;
@@ -19,13 +20,27 @@ public class Minestorm {
 	private String session;
 	private String host;
 	private int port;
+	private int timeout;
 	public static final Logger LOGGER=Logger.getLogger("Minestorm");
 	
-	public Minestorm(String host, int port){
+	
+	/**
+	 * Minestorm constructor
+	 * 
+	 * @param host Minestorm server host
+	 * @param port Minestorm server port
+	 * @param timeout Connections timeout in milliseconds
+	 */
+	public Minestorm(String host, int port, int timeout){
 		this.host=host;
 		this.port=port;
+		this.timeout=timeout;
 	}
 	
+	/**
+	 * 
+	 * @return <b>true</b> if connection is successful
+	 */
 	public boolean connect(){
 		PacketInNewSession ns=new PacketInNewSession();
 		ns.setStatus(PacketType.NEW_SESSION.getStatus());
@@ -41,6 +56,19 @@ public class Minestorm {
 		}
 	}
 	
+	public void ping(){
+		PacketInPing ping=new PacketInPing();
+		ping.setStatus(PacketType.PING.getStatus());
+		ping.setSid(session);
+		sendPacket(ping);
+	}
+	
+	/**
+	 * Starts the selected minecraft server
+	 * 
+	 * @param serverName minecraft server name
+	 * @param flags Java flags
+	 */ 
 	public void startServer(String serverName, String flags){
 		PacketInStartServer in=new PacketInStartServer();
 		in.setStatus(PacketType.START_SERVER.getStatus());
@@ -53,6 +81,11 @@ public class Minestorm {
 		}
 	}
 	
+	/**
+	 * Stops the selected minecraft server
+	 * 
+	 * @param serverName minecraft server name
+	 */
 	public void stopServer(String serverName){
 		PacketInStopServer in=new PacketInStopServer();
 		in.setStatus(PacketType.STOP_SERVER.getStatus());
@@ -67,6 +100,7 @@ public class Minestorm {
 	private Packet sendPacket(Packet packet){
 		try {
 			Socket socket=new Socket(host, port);
+			socket.setSoTimeout(timeout);
 			BufferedReader reader=new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			Gson gson=new Gson();
 			String jsonRequest= gson.toJson(packet);
